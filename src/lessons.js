@@ -1,7 +1,7 @@
 import { connectToDb } from "./utils/connectToDb.js";
 import { FieldValue } from "firebase-admin/firestore";
-
-export const createLesson = (req, res) => {
+import { createRoom } from "./utils/ms100.js";
+export const createLesson = async (req, res) => {
   const db = connectToDb();
 
   const lessonData = {
@@ -11,17 +11,27 @@ export const createLesson = (req, res) => {
     lessonTime: req.body.lessonTime,
     registeredStudents: req.body.registeredStudents,
   };
-
-  db.collection("lessons")
-    .add({ ...lessonData, createdOn: FieldValue.serverTimestamp() })
-    .then((doc) => {
-      res.status(201).send({
-        message: "Lesson created successfully!",
-        data: lessonData,
-        id: doc.id,
-      });
-    })
-    .catch((err) => res.status(500).send(err));
+  try {
+    const docRef = await db.collection("lessons").add({
+      ...lessonData,
+      createdOn: FieldValue.serverTimestamp(),
+    });
+    const doc = await docRef.get();
+    const createdLesson = {
+      data: doc.data(),
+      id: doc.id,
+    };
+    const room = await createRoom(createdLesson.id);
+    res.status(201).send({
+      message: "Lesson created successfully!",
+      data: lessonData,
+      id: doc.id,
+    });
+  } catch (error) {
+    res.status(500).send(error);
+    console.error(error);
+    throw error;
+  }
 };
 
 export const getLessons = (req, res) => {
