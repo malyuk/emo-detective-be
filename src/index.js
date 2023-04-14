@@ -15,7 +15,7 @@ app.use(cors());
 
 app.post("/lessons", createLesson);
 app.get("/lessons", getLessons);
-app.get("/lessons/:lessonId", getSingleLesson);
+app.get("/lessons/:lessonId/:userId?", getSingleLesson);
 
 app.post("/users", createUser);
 
