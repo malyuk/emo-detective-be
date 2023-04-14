@@ -3,7 +3,7 @@ import { FieldValue } from "firebase-admin/firestore";
 
 export const createStatistic = (req, res) => {
   const db = connectToDb();
-  const { userId, emotion, engagementScore } = req.body;
+  const { userId, emotions, engagementScore } = req.body;
   db.collection("stats")
     .add({
       userId,
