@@ -19,3 +19,21 @@ export const createStatistic = (req, res) => {
     })
     .catch((err) => res.status(500).send(err));
 };
+
+export const getStatsByUser = (req, res) => {
+  const db = connectToDb();
+  const { userId } = req.params;
+
+  db.collection("stats")
+    .where("userId", "==", userId)
+    .get()
+    .then((snapshot) => {
+      const stats = snapshot.docs.map((doc) => {
+        let stat = doc.data();
+        stat.id = doc.id;
+        return stat;
+      });
+      res.send(stats);
+    })
+    .catch();
+};
