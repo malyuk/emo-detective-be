@@ -3,6 +3,8 @@ dotenv.config();
 import express from "express";
 import cors from "cors";
 import { createLesson, getLessons, getSingleLesson } from "./lessons.js";
+import { createUser } from "./users.js";
+import { createStatistic } from "./stats.js";
 
 const app = express();
 
@@ -14,6 +16,10 @@ app.use(cors());
 app.post("/lessons", createLesson);
 app.get("/lessons", getLessons);
 app.get("/lessons/:lessonId", getSingleLesson);
+
+app.post("/users", createUser);
+
+app.post("/stats", createStatistic);
 
 app.listen(port, () => {
   console.log(`Listening on port ${port}`);
