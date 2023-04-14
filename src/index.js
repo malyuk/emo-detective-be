@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { createLesson } from "./lesson.js";
+import { createLesson, getLessons, getSingleLesson } from "./lessons.js";
 
 const app = express();
 
@@ -10,6 +10,8 @@ app.use(express.json());
 app.use(cors());
 
 app.post("/lessons", createLesson);
+app.get("/lessons", getLessons);
+app.get("/lessons/:lessonId", getSingleLesson);
 
 app.listen(port, () => {
   console.log(`Listening on port ${port}`);

@@ -23,3 +23,32 @@ export const createLesson = (req, res) => {
     })
     .catch((err) => res.status(500).send(err));
 };
+
+export const getLessons = (req, res) => {
+  const db = connectToDb();
+  db.collection("lessons")
+    .get()
+    .then((snapshot) => {
+      const lessons = snapshot.docs.map((doc) => {
+        let lesson = doc.data();
+        lesson.id = doc.id;
+        return lesson;
+      });
+      res.send(lessons);
+    })
+    .catch((err) => res.status(500).send(err));
+};
+
+export const getSingleLesson = (req, res) => {
+  const db = connectToDb();
+  db.collection("lessons")
+    .doc(req.params.lessonId)
+    .get()
+    .then((doc) => {
+      const lesson = doc.data();
+
+      lesson.id = doc.id;
+      res.send(lesson);
+    })
+    .catch((err) => res.status(500).send(err));
+};
