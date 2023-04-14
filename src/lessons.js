@@ -16,15 +16,20 @@ export const createLesson = async (req, res) => {
       ...lessonData,
       createdOn: FieldValue.serverTimestamp(),
     });
-    const doc = await docRef.get();
-    const createdLesson = {
+    let doc = await docRef.get();
+    let createdLesson = {
       data: doc.data(),
       id: doc.id,
     };
-    const room = await createRoom(createdLesson.id);
+    const { hostRoomCode, guestRoomCode } = await createRoom(createdLesson.id);
+    docRef.update({
+      hostRoomCode: hostRoomCode,
+      guestRoomCode: guestRoomCode,
+    });
+    doc = await docRef.get();
     res.status(201).send({
       message: "Lesson created successfully!",
-      data: lessonData,
+      data: doc.data(),
       id: doc.id,
     });
   } catch (error) {
@@ -55,9 +60,16 @@ export const getSingleLesson = (req, res) => {
     .doc(req.params.lessonId)
     .get()
     .then((doc) => {
-      const lesson = doc.data();
-
-      lesson.id = doc.id;
+      let lesson = {
+        lessonDate: doc.data().lessonDate,
+        lessonTime: doc.data().lessonTime,
+        lessonName: doc.data().lessonName,
+        lessonId: doc.id,
+        roomCode:
+          req.params.userId !== doc.data().createdBy
+            ? doc.data().guestRoomCode
+            : doc.data().hostRoomCode,
+      };
       res.send(lesson);
     })
     .catch((err) => res.status(500).send(err));

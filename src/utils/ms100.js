@@ -11,5 +11,19 @@ export const createRoom = async (roomName) => {
     template_id: process.env.MS100_TEMPLATE_ID,
     region: process.env.MS100_REGION,
   });
-  return room;
+  const roomCodesForRoom = await hms.roomCodes.create(room.id);
+  let hostRoomCode,
+    guestRoomCode = "";
+  roomCodesForRoom.map((roomCode) => {
+    if (roomCode.role === "host") {
+      hostRoomCode = roomCode.code;
+    }
+    if (roomCode.role === "guest") {
+      guestRoomCode = roomCode.code;
+    }
+  });
+  return {
+    hostRoomCode: hostRoomCode,
+    guestRoomCode: guestRoomCode,
+  };
 };
