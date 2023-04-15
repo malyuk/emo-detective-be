@@ -42,7 +42,7 @@ export const createLesson = async (req, res) => {
 export const getLessons = (req, res) => {
   const db = connectToDb();
   db.collection("lessons")
-    .get()
+    .find({ createdBy: req.params.userId })
     .then((snapshot) => {
       const lessons = snapshot.docs.map((doc) => {
         let lesson = doc.data();
@@ -54,6 +54,27 @@ export const getLessons = (req, res) => {
     .catch((err) => res.status(500).send(err));
 };
 
+export const getStudentLessons = async (req, res) => {
+  const db = connectToDb();
+  try {
+    const usersRef = db.collection("users");
+    const query = usersRef.doc(req.params.userId);
+    const userSnapshot = await query.get();
+    const studentEmail = userSnapshot.data().email;
+    const snapshot = await db
+      .collection("lessons")
+      .where("registeredStudents", "array-contains", studentEmail)
+      .get();
+    const lessons = snapshot.docs.map((doc) => {
+      let lesson = doc.data();
+      lesson.id = doc.id;
+      return lesson;
+    });
+    res.send(lessons);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+};
 export const getSingleLesson = (req, res) => {
   const db = connectToDb();
   db.collection("lessons")
