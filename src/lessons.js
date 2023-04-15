@@ -54,6 +54,37 @@ export const getLessons = (req, res) => {
     .catch((err) => res.status(500).send(err));
 };
 
+export const addUserToLesson = async (req, res) => {
+  const db = connectToDb();
+  try {
+    const usersRef = db.collection("users");
+
+    const query = usersRef.doc(req.body.userId);
+    const userSnapshot = await query.get();
+    const studentEmail = userSnapshot.data().email;
+    console.log(studentEmail);
+    const lessonRef = db.collection("lessons").doc(req.params.lessonId);
+    const lessonSnapshot = await lessonRef.get();
+    const registeredStudents = lessonSnapshot.data().registeredStudents;
+    if (registeredStudents.includes(studentEmail)) {
+      res.status(400).send({
+        message: "Student already registered for this lesson",
+      });
+    } else {
+      await lessonRef.update({
+        registeredStudents: FieldValue.arrayUnion(studentEmail),
+      });
+      res.status(200).send({
+        message: "Student added to lesson",
+      });
+    }
+  } catch (error) {
+    res.status(500).send({
+      message: "Failed to add student to lesson",
+    });
+  }
+};
+
 export const getStudentLessons = async (req, res) => {
   const db = connectToDb();
   try {
@@ -87,7 +118,7 @@ export const getSingleLesson = (req, res) => {
         lessonName: doc.data().lessonName,
         lessonId: doc.id,
         roomCode:
-          req.params.userId !== doc.data().createdBy
+          req.param.userId && req.params.userId !== doc.data().createdBy
             ? doc.data().guestRoomCode
             : doc.data().hostRoomCode,
       };

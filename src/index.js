@@ -7,6 +7,7 @@ import {
   getLessons,
   getSingleLesson,
   getStudentLessons,
+  addUserToLesson,
 } from "./lessons.js";
 import { createUser } from "./users.js";
 import { createStatistic, getStatsByLesson, getStatsByUser } from "./stats.js";
@@ -20,8 +21,9 @@ app.use(cors());
 
 app.post("/lessons", createLesson);
 app.get("/lessons/:userId", getLessons);
+app.put("/lessons/:lessonId", addUserToLesson);
 app.get("/lessons/student/:userId", getStudentLessons);
-app.get("/lessons/:lessonId/:userId?", getSingleLesson);
+app.get("/lesson/:lessonId/:userId?", getSingleLesson);
 
 app.post("/users", createUser);
 
