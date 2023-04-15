@@ -4,7 +4,7 @@ import express from "express";
 import cors from "cors";
 import { createLesson, getLessons, getSingleLesson } from "./lessons.js";
 import { createUser } from "./users.js";
-import { createStatistic, getStatsByUser } from "./stats.js";
+import { createStatistic, getStatsByLesson, getStatsByUser } from "./stats.js";
 
 const app = express();
 
@@ -20,7 +20,8 @@ app.get("/lessons/:lessonId/:userId?", getSingleLesson);
 app.post("/users", createUser);
 
 app.post("/stats", createStatistic);
-app.get("/stats/:userId", getStatsByUser);
+app.get("/stats/user/:userId", getStatsByUser);
+app.get("/stats/lesson/:lessonId", getStatsByLesson);
 
 app.listen(port, () => {
   console.log(`Listening on port ${port}`);

@@ -3,12 +3,13 @@ import { FieldValue } from "firebase-admin/firestore";
 
 export const createStatistic = (req, res) => {
   const db = connectToDb();
-  const { userId, emotions, engagementScore } = req.body;
+  const { userId, emotions, engagementScore, lessonId } = req.body;
   db.collection("stats")
     .add({
       userId,
       engagementScore,
       emotions,
+      lessonId,
       createdOn: FieldValue.serverTimestamp(),
     })
     .then((doc) => {
@@ -36,4 +37,46 @@ export const getStatsByUser = (req, res) => {
       res.send(stats);
     })
     .catch();
+};
+
+export const getStatsByLesson = async (req, res) => {
+  const db = connectToDb();
+  const { lessonId } = req.params;
+
+  try {
+    const lessonRef = db.collection("lessons");
+
+    const lessonDoc = await lessonRef.doc(lessonId).get();
+    const lessonData = lessonDoc.data();
+    const studentEmails = lessonData.registeredStudents;
+
+    const usersRef = db.collection("users");
+    const query = usersRef.where("email", "in", studentEmails);
+
+    const userSnapshot = await query.get();
+
+    let userIds = [];
+    let results = [];
+
+    for (const userDoc of userSnapshot.docs) {
+      const userId = userDoc.id;
+      userIds.push(userId);
+      const statsRef = db
+        .collection("stats")
+        .where("userId", "==", userId)
+        .where("lessonId", "==", lessonId);
+      const userStatsQuerySnapshot = await statsRef.get();
+      userStatsQuerySnapshot.forEach((stat) => {
+        results.push(stat.data());
+      });
+    }
+
+    res.send({
+      data: results,
+      totalCount: results.length,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: "Internal server error" });
+  }
 };

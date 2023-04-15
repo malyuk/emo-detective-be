@@ -3,12 +3,13 @@ import { FieldValue } from "firebase-admin/firestore";
 
 export const createUser = (req, res) => {
   const db = connectToDb();
-  const { userId, role } = req.body;
+  const { userId, email, role } = req.body;
   db.collection("users")
     .doc(userId)
     .set({
-      userId: userId,
-      role: role,
+      userId,
+      email,
+      role,
       createdOn: FieldValue.serverTimestamp(),
     })
     .then(() => {
