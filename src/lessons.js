@@ -62,10 +62,10 @@ export const addUserToLesson = async (req, res) => {
     const query = usersRef.doc(req.body.userId);
     const userSnapshot = await query.get();
     const studentEmail = userSnapshot.data().email;
-    console.log(studentEmail);
     const lessonRef = db.collection("lessons").doc(req.params.lessonId);
     const lessonSnapshot = await lessonRef.get();
     const registeredStudents = lessonSnapshot.data().registeredStudents;
+
     if (registeredStudents.includes(studentEmail)) {
       res.status(400).send({
         message: "Student already registered for this lesson",
